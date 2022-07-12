@@ -7,6 +7,8 @@ import (
 	"github.com/jaredhughes1012/cfg"
 )
 
+type object map[string]any
+
 // Special options used to control how environment variable configuration is loaded
 type Options struct {
 	// If set, only variables that start with the given prefix will be opened
@@ -28,11 +30,11 @@ type EnvLoader struct {
 	opts *Options
 }
 
-func fold(from, onto map[string]interface{}) map[string]interface{} {
+func fold(from, onto object) object {
 	return nil
 }
 
-func varToMap(envVar, delim string) map[string]interface{} {
+func varToMap(envVar, delim string) object {
 	return nil
 }
 
