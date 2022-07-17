@@ -6,8 +6,6 @@ import (
 	"testing"
 )
 
-type object map[string]any
-
 func compareMaps(t *testing.T, expected, actual map[string]interface{}) {
 	b, _ := json.Marshal(expected)
 	expStr := string(b)
@@ -23,73 +21,92 @@ func compareMaps(t *testing.T, expected, actual map[string]interface{}) {
 func Test_Fold(t *testing.T) {
 	cases := []struct {
 		name   string
-		from   object
-		onto   object
-		result object
+		from   map[string]any
+		onto   map[string]any
+		result map[string]any
 	}{
 		{
 			name: "Onto Empty",
-			from: object{
+			from: map[string]any{
 				"test": "val",
 			},
-			onto: object{},
-			result: object{
+			onto: map[string]any{},
+			result: map[string]any{
 				"test": "val",
 			},
 		},
 		{
 			name: "Two non empty",
-			from: object{
+			from: map[string]any{
 				"test1": "val1",
 			},
-			onto: object{
+			onto: map[string]any{
 				"test2": "val2",
 			},
-			result: object{
+			result: map[string]any{
 				"test1": "val1",
 				"test2": "val2",
 			},
 		},
 		{
 			name: "Overwrite",
-			from: object{
+			from: map[string]any{
 				"test": "val1",
 			},
-			onto: object{
+			onto: map[string]any{
 				"test": "val2",
 			},
-			result: object{
+			result: map[string]any{
 				"test": "val1",
 			},
 		},
 		{
 			name: "Map onto primitive",
-			from: object{
-				"test": object{
+			from: map[string]any{
+				"test": map[string]any{
 					"test2": "val",
 				},
 			},
-			onto: object{
+			onto: map[string]any{
 				"test": "string",
 			},
-			result: object{
-				"test": object{
+			result: map[string]any{
+				"test": map[string]any{
 					"test2": "val",
 				},
 			},
 		},
 		{
 			name: "Primitive onto map",
-			from: object{
+			from: map[string]any{
 				"test": "string",
 			},
-			onto: object{
-				"test": object{
+			onto: map[string]any{
+				"test": map[string]any{
 					"test2": "val",
 				},
 			},
-			result: object{
+			result: map[string]any{
 				"test": "string",
+			},
+		},
+		{
+			name: "Nested Flatten",
+			from: map[string]any{
+				"test": map[string]any{
+					"test1": "val1",
+				},
+			},
+			onto: map[string]any{
+				"test": map[string]any{
+					"test2": "val2",
+				},
+			},
+			result: map[string]any{
+				"test": map[string]any{
+					"test1": "val1",
+					"test2": "val2",
+				},
 			},
 		},
 	}
@@ -105,43 +122,43 @@ func Test_Fold(t *testing.T) {
 func Test_Flatten(t *testing.T) {
 	cases := []struct {
 		name     string
-		input    object
-		expected object
+		input    map[string]any
+		expected map[string]any
 		delim    string
 	}{
 		{
 			name:  "One deep",
 			delim: ".",
-			input: object{
+			input: map[string]any{
 				"one": "test",
 			},
-			expected: object{
+			expected: map[string]any{
 				"one": "test",
 			},
 		},
 		{
 			name:  "Two deep",
 			delim: ",",
-			input: object{
-				"one": object{
+			input: map[string]any{
+				"one": map[string]any{
 					"two": "test",
 				},
 			},
-			expected: object{
+			expected: map[string]any{
 				"one,two": "test",
 			},
 		},
 		{
 			name:  "Three deep",
 			delim: ".",
-			input: object{
-				"one": object{
-					"two": object{
+			input: map[string]any{
+				"one": map[string]any{
+					"two": map[string]any{
 						"three": "test",
 					},
 				},
 			},
-			expected: object{
+			expected: map[string]any{
 				"one.two.three": "test",
 			},
 		},
@@ -156,10 +173,10 @@ func Test_Flatten(t *testing.T) {
 }
 
 func Test_ConvertKeys(t *testing.T) {
-	input := object{
+	input := map[string]any{
 		"KEY": "value",
 	}
-	expected := object{
+	expected := map[string]any{
 		"key": "value",
 	}
 

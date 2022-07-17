@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/jaredhughes1012/cfg"
+	"github.com/jaredhughes1012/cfg/internal/mapconvert"
 )
 
 type object map[string]any
@@ -30,12 +31,36 @@ type EnvLoader struct {
 	opts *Options
 }
 
-func fold(from, onto object) object {
-	return nil
+func varToMap(key, val, delim string) object {
+	segs := strings.Split(key, delim)
+	var m, mprev, mroot map[string]any
+	m = make(map[string]any)
+	mroot = m
+
+	for _, k := range segs[:len(segs)-1] {
+		mprev = m
+		m = make(map[string]any)
+		mprev[k] = m
+	}
+
+	m[segs[len(segs)-1]] = val
+	return mroot
 }
 
-func varToMap(envVar, delim string) object {
-	return nil
+func prepareVar(prefix, envVar string) (string, string) {
+	if len(prefix) > 0 {
+		iPrefix := strings.Index(envVar, prefix)
+		if iPrefix != 0 {
+			return "", ""
+		}
+		envVar = envVar[iPrefix+len(prefix):]
+	}
+
+	ikey := strings.Index(envVar, "=")
+	key := envVar[0:ikey]
+	val := envVar[ikey+1:]
+
+	return key, val
 }
 
 // Loads configuration from a source into a map
@@ -43,12 +68,13 @@ func (loader EnvLoader) Load() (map[string]any, error) {
 	data := make(map[string]any)
 
 	for _, v := range os.Environ() {
-		i := strings.Index(v, loader.opts.Prefix)
-		if i >= 0 {
-			vTrim := v[i+len(loader.opts.Prefix) : len(v)-1]
-			envData := varToMap(vTrim, loader.opts.Delimiter)
-			data = fold(envData, data)
+		key, val := prepareVar(loader.opts.Prefix, v)
+		if key == "" {
+			continue
 		}
+
+		envData := varToMap(key, val, loader.opts.Delimiter)
+		data = mapconvert.Fold(envData, data)
 	}
 
 	return data, nil

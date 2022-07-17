@@ -32,10 +32,11 @@ func prefixFlatten(target, m map[string]any, prefix, delim string) {
 	}
 
 	for k, v := range m {
+		k := fmt.Sprintf("%s%s", prefix, k)
 		if vMap, ok := v.(map[string]any); ok {
-			prefixFlatten(target, vMap, prefix, delim)
+			prefixFlatten(target, vMap, k, delim)
 		} else {
-			target[fmt.Sprintf("%s%s", prefix, k)] = v
+			target[k] = v
 		}
 	}
 }
