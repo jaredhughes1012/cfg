@@ -123,6 +123,15 @@ func (cfg Config) MustGetFloat64(key string) float64 {
 	return data
 }
 
+// Binds multiple configuration values simultaneously. The binder registers pointers for configuration
+// values, which are all resolved and set simultaneously. If any bound values are not found, the error
+// will be returned and none of the pointers will be modified
+func (cfg Config) Bind(bindFunc func(*Binder)) error {
+	binder := newBinder(&cfg)
+	bindFunc(binder)
+	return binder.execute()
+}
+
 // Generic structure used to load configuration from a source into an object. cfg will process and
 // flatten this map internally. Loaders should not modify any names of config values, this should
 // be manged internally by cfg

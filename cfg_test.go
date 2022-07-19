@@ -301,3 +301,44 @@ func Test_Config_GetFloat64(t *testing.T) {
 		})
 	}
 }
+
+func Test_Config_Bind(t *testing.T) {
+	strExpected := "test"
+	intExpected := 17
+	float64Expected := float64(100)
+
+	var strActual string
+	var intActual int
+	var float64Actual float64
+
+	keyStr, keyInt, keyFloat64 := "string", "int", "float64"
+	data := map[string]any{
+		keyStr:     strExpected,
+		keyInt:     intExpected,
+		keyFloat64: float64Expected,
+	}
+
+	cfg, err := newConfigAndLoad(newTestLoader(data, nil))
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	err = cfg.Bind(func(b *Binder) {
+		b.StringVar(&strActual, keyStr)
+		b.IntVar(&intActual, keyInt)
+		b.Float64Var(&float64Actual, keyFloat64)
+	})
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	if strExpected != strActual {
+		t.Errorf("String %s != %s", strExpected, strActual)
+	}
+	if intExpected != intActual {
+		t.Errorf("Int %d != %d", intExpected, intActual)
+	}
+	if float64Expected != float64Actual {
+		t.Errorf("Float64 %f != %f", float64Expected, float64Actual)
+	}
+}
