@@ -3,6 +3,7 @@ package cfg
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/jaredhughes1012/cfg/internal/mapconvert"
 )
@@ -38,6 +39,11 @@ func (cfg *Config) Load() error {
 
 		data = mapconvert.Fold(d, data)
 	}
+
+	data = mapconvert.Flatten(data, ":")
+	data = mapconvert.ConvertKeys(data, func(key string) string {
+		return strings.Replace(strings.ToLower(key), "_", "", -1)
+	})
 
 	cfg.data = data
 	return nil
