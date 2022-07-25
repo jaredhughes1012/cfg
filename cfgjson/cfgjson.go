@@ -9,14 +9,19 @@ import (
 
 // Config loader designed to load from JSON files
 type JsonLoader struct {
-	path string
+	path     string
+	required bool
 }
 
 // Loads configuration from a source into a map
 func (loader JsonLoader) Load() (map[string]any, error) {
 	f, err := os.Open(loader.path)
 	if err != nil {
-		return nil, err
+		if !loader.required {
+			return map[string]any{}, nil
+		} else {
+			return nil, err
+		}
 	}
 
 	var data map[string]any
@@ -29,8 +34,9 @@ func (loader JsonLoader) Load() (map[string]any, error) {
 
 var _ cfg.Loader = (*JsonLoader)(nil)
 
-func NewLoader(path string) *JsonLoader {
+func NewLoader(path string, required bool) *JsonLoader {
 	return &JsonLoader{
-		path: path,
+		path:     path,
+		required: required,
 	}
 }
